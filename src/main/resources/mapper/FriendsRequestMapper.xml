@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hbr.mapper.FriendsRequestMapper" >
+  <resultMap id="BaseResultMap" type="com.hbr.pojo.FriendsRequest" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="send_user_id" property="sendUserId" jdbcType="VARCHAR" />
+    <result column="accept_user_id" property="acceptUserId" jdbcType="VARCHAR" />
+    <result column="request_date_time" property="requestDateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+<!--    连表查询-->
+    <resultMap id="WithUser" type="com.hbr.pojo.FriendsRequest" extends="BaseResultMap">
+        <collection property="sentUser" ofType="com.hbr.pojo.User">
+            <id column="uid" jdbcType="VARCHAR" property="id" />
+            <result column="username" jdbcType="VARCHAR" property="username" />
+            <result column="password" jdbcType="VARCHAR" property="password" />
+            <result column="face_image" jdbcType="VARCHAR" property="faceImage" />
+            <result column="face_image_big" jdbcType="VARCHAR" property="faceImageBig" />
+            <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+            <result column="qrcode" jdbcType="VARCHAR" property="qrcode" />
+            <result column="cid" jdbcType="VARCHAR" property="cid" />
+        </collection>
+    </resultMap>
+    <!--
+    <sql id="Base_Column_List">
+        id, username, password, face_image, face_image_big, nickname, qrcode, cid
+    </sql>-->
+  <sql id="Base_Column_List" >
+    id, send_user_id, accept_user_id, request_date_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from friends_request
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+    <select id="selectByTwo" resultType="com.hbr.pojo.FriendsRequest">
+        select
+        <include refid="Base_Column_List" />
+        from friends_request
+        where
+        send_user_id = #{sentId, jdbcType=VARCHAR}
+        and
+        accept_user_id = #{acceptId, jdbcType=VARCHAR}
+    </select>
+    <select id="selectByAcceptId" resultMap="WithUser">
+        select
+        fr.id, fr.send_user_id, fr.accept_user_id, fr.request_date_time,
+        u.id uid, u.username, u.face_image, u.face_image_big, u.nickname, u.qrcode
+        from friends_request fr
+        left join users u
+        on fr.send_user_id = u.id
+        where accept_user_id = #{id, jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from friends_request
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.hbr.pojo.FriendsRequest" >
+    insert into friends_request (id, send_user_id, accept_user_id, 
+      request_date_time)
+    values (#{id,jdbcType=VARCHAR}, #{sendUserId,jdbcType=VARCHAR}, #{acceptUserId,jdbcType=VARCHAR}, 
+      #{requestDateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hbr.pojo.FriendsRequest" >
+    insert into friends_request
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sendUserId != null" >
+        send_user_id,
+      </if>
+      <if test="acceptUserId != null" >
+        accept_user_id,
+      </if>
+      <if test="requestDateTime != null" >
+        request_date_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="sendUserId != null" >
+        #{sendUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="acceptUserId != null" >
+        #{acceptUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="requestDateTime != null" >
+        #{requestDateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hbr.pojo.FriendsRequest" >
+    update friends_request
+    <set >
+      <if test="sendUserId != null" >
+        send_user_id = #{sendUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="acceptUserId != null" >
+        accept_user_id = #{acceptUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="requestDateTime != null" >
+        request_date_time = #{requestDateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hbr.pojo.FriendsRequest" >
+    update friends_request
+    set send_user_id = #{sendUserId,jdbcType=VARCHAR},
+      accept_user_id = #{acceptUserId,jdbcType=VARCHAR},
+      request_date_time = #{requestDateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

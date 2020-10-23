@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hbr.mapper.MyFriendsMapper" >
+  <resultMap id="BaseResultMap" type="com.hbr.pojo.MyFriends" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="my_user_id" property="myUserId" jdbcType="VARCHAR" />
+    <result column="my_friend_user_id" property="myFriendUserId" jdbcType="VARCHAR" />
+  </resultMap>
+    <resultMap id="WithUser" type="com.hbr.pojo.MyFriends" extends="BaseResultMap">
+        <collection property="friend" ofType="com.hbr.pojo.User">
+            <id column="uid" jdbcType="VARCHAR" property="id" />
+            <result column="username" jdbcType="VARCHAR" property="username" />
+            <result column="password" jdbcType="VARCHAR" property="password" />
+            <result column="face_image" jdbcType="VARCHAR" property="faceImage" />
+            <result column="face_image_big" jdbcType="VARCHAR" property="faceImageBig" />
+            <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+            <result column="qrcode" jdbcType="VARCHAR" property="qrcode" />
+            <result column="cid" jdbcType="VARCHAR" property="cid" />
+        </collection>
+    </resultMap>
+  <sql id="Base_Column_List" >
+    id, my_user_id, my_friend_user_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from my_friends
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="queryByFriendId" resultMap="BaseResultMap" parameterType="com.hbr.pojo.MyFriends" >
+      select
+      <include refid="Base_Column_List" />
+      from my_friends
+      where
+      my_user_id = #{myId,jdbcType=VARCHAR}
+      and
+      my_friend_user_id = #{fid,jdbcType=VARCHAR}
+  </select>
+    <select id="selectByMyUserId" resultMap="WithUser" parameterType="java.lang.String">
+        select mf.id, mf.my_user_id, mf.my_friend_user_id,
+        u.id uid, u.username, u.face_image, u.face_image_big, u.nickname, u.qrcode
+        from my_friends mf
+        left join users u
+        on mf.my_friend_user_id = u.id
+        where
+        <if test="myId != null">
+            mf.my_user_id = #{myId, jdbcType=VARCHAR}
+        </if>
+    </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from my_friends
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.hbr.pojo.MyFriends" >
+    insert into my_friends (id, my_user_id, my_friend_user_id
+      )
+    values (#{id,jdbcType=VARCHAR}, #{myUserId,jdbcType=VARCHAR}, #{myFriendUserId,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.hbr.pojo.MyFriends" >
+    insert into my_friends
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="myUserId != null" >
+        my_user_id,
+      </if>
+      <if test="myFriendUserId != null" >
+        my_friend_user_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="myUserId != null" >
+        #{myUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="myFriendUserId != null" >
+        #{myFriendUserId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hbr.pojo.MyFriends" >
+    update my_friends
+    <set >
+      <if test="myUserId != null" >
+        my_user_id = #{myUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="myFriendUserId != null" >
+        my_friend_user_id = #{myFriendUserId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hbr.pojo.MyFriends" >
+    update my_friends
+    set my_user_id = #{myUserId,jdbcType=VARCHAR},
+      my_friend_user_id = #{myFriendUserId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>
